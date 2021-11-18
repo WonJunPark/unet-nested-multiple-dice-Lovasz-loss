@@ -144,6 +144,7 @@ def train_net(net, cfg):
                     loss = 0
                     for inference_mask in inferences:
                         loss_ce = criterion(inference_mask, masks)
+                        loss_ce /= len(inferences)
 
                         inference_mask = F.softmax(inference_mask, dim=1)
                         dice_loss1 = dice_coeff(inference_mask[:,1,:,:], masks)
@@ -151,55 +152,7 @@ def train_net(net, cfg):
                         dice_loss = 1 - (dice_loss1 + dice_loss2)/2
 
                         loss += loss_ce * 0.5 + dice_loss * 0.5
-                        # for k in range(len(inference_mask)):
-                        #     loss_dice += dice_coeff(inference_mask, masks)
-
-
-                        # loss_ce = criterion(inference_mask, masks)
-                        #
-                        # probs = F.softmax(inference_mask, dim=1)
-                        # probs = probs.squeeze(0)
-                        #
-                        # _, __, w, h = masks.shape
-                        #
-                        # tf = transforms.Compose(
-                        #     [
-                        #         transforms.ToPILImage(),
-                        #         transforms.Resize((h, w)),
-                        #         # transforms.Resize((512, 512)),
-                        #         transforms.ToTensor()
-                        #     ]
-                        # )
-                        #
-                        # masks2 = []
-                        #
-                        # masks12 = masks.cpu().numpy()
-                        # ivh = np.where(masks12 == 1, 1, 0)
-                        # ich = np.where(masks12 == 2, 1, 0)
-                        #
-                        # for prob in probs:
-                        #     prob = tf(prob.cpu())
-                        #     mask = prob.squeeze().cpu().numpy()
-                        #     # mask = mask > cfg.out_threshold
-                        #     masks2.append(mask)
-                        #
-                        # ivh_dice = 0
-                        # ich_dice = 0
-                        #
-                        # for ii in range(len(masks2)):
-                        #     mask2 = masks2[ii]
-                        #
-
-                        #     ivh_dice += dice_c(mask2[1], ivh[ii])
-                        #     ich_dice += dice_c(mask2[2], ich[ii])
-                        #
-                        # ivh_dice /= len(masks2)
-                        # ich_dice /= len(masks2)
-                        #
-                        # loss_dice = 1-(ivh_dice+ich_dice/2)
-                        # loss += loss_ce*0.5 + loss_dice*0.5
-                        # # loss += loss_dice * 0.5
-                    loss /= len(inferences)
+                   
 
                 else:
                     # loss = criterion(inferences, masks)
